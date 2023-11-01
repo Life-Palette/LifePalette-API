@@ -11,9 +11,9 @@ export class AliossService {
   private client: any
   public constructor() {
     this.client = new OSS({
-      region: 'oss-cn-chengdu',
-      accessKeyId: 'LTAI5tN5PnDYug4UQLwuuVha',
-      accessKeySecret: 'RhAYCMyDwS8fJb6fjQUhNUslk42hX2',
+      region: '****',
+      accessKeyId: '****',
+      accessKeySecret: 'R****',
       bucket: 'nest-js',
       cname: true,
       endpoint: 'nest-js.oss-accelerate.aliyuncs.com',
