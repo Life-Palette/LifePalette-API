@@ -56,4 +56,11 @@ export class AliossController {
   async completeMul(@Body() bodyDta: any) {
     return await this.aliossService.completeMultipartUpload(bodyDta)
   }
+
+  // 基本上传
+  @Post('uploadBase')
+  @UseInterceptors(FileInterceptor('file'))
+  async baseUpload(@UploadedFile() file: Express.Multer.File, @Body() formData: any) {
+    return await this.aliossService.baseUpload(file, formData)
+  }
 }

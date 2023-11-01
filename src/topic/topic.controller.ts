@@ -25,15 +25,15 @@ export class TopicController {
     @Query('sort', new DefaultValuePipe('createdAt,desc')) sort: string,
 
     @Query('title') title?: string,
-    // @Query('content') content?: string,
+    @Query('keywords') keywords?: string,
     @Query('tagId') tagId?: number,
   ) {
-    return this.topicService.findAll(page, size, sort, title, tagId)
+    return this.topicService.findAll(page, size, sort, title, tagId, keywords)
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.topicService.findOne(+id)
+  findOne(@Param('id') id: string, @Query('userId') userId?: number) {
+    return this.topicService.findOne(+id, userId)
   }
 
   @Patch(':id')

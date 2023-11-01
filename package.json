@@ -37,7 +37,9 @@
     "@nestjs/jwt": "^9.0.0",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-socket.io": "^8.0.2",
     "@nestjs/swagger": "^7.1.1",
+    "@nestjs/websockets": "^8.0.2",
     "@prisma/client": "^4.3.1",
     "@types/ali-oss": "^6.16.8",
     "ali-oss": "^6.17.1",
@@ -60,7 +62,9 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "sharp": "^0.32.1",
-    "swagger-ui-express": "^5.0.0"
+    "socket.io": "^4.7.2",
+    "swagger-ui-express": "^5.0.0",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

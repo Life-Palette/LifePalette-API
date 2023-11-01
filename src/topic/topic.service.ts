@@ -29,11 +29,16 @@ export class TopicService {
     })
   }
 
-  async findAll(page: number, pSize: number, sort: string, title?: string, tagId?: number) {
+  async findAll(page: number, pSize: number, sort: string, title?: string, tagId?: number, keywords?: string) {
     const where = {}
     title && (where['title'] = { contains: title })
     // content && (where['content'] = { contains: content })
     tagId && (where['TopicTag'] = { some: { tagId } })
+    keywords &&
+      (where['OR'] = [
+        { title: { contains: keywords } },
+        { content: { contains: keywords } }
+      ])
 
     const sortWay = sort.split(',').find((item) => ['desc', 'asc'].includes(item)) || 'desc'
     const sortField = sort.split(',').find((item) => !['desc', 'asc'].includes(item)) || 'createdAt'
@@ -47,58 +52,57 @@ export class TopicService {
         User: {
           select: { id: true, name: true, avatar: true },
         },
+        TopicTag: true,
       },
     })
 
-    const newData = data.map((item) => {
+    const newData = data.map(async (item) => {
       const filesTemp = item.files ? item.files : []
       const fileList = Array.isArray(filesTemp) ? filesTemp : [filesTemp]
-      // const files = fileList.map((item: any) => {
-      //   const baseData = {
-      //     file: getFileurl(item.filePath),
-      //     filePath: item.filePath,
-      //   }
-      //   if (item.thumbnailPath) {
-      //     baseData['thumbnailUrl'] = getFileurl(item.thumbnailPath)
-      //     baseData['thumbnailPath'] = item.thumbnailPath
-      //   }
-      //   return baseData
-      // })
-      // console.log('fileList', fileList)
+      // console.log('item',item)
+      // tag
+      const tags = item.TopicTag.map((item) => item.tagId)
+      const tagList = await this.prisma.tag.findMany({ where: { id: { in: tags } } })
+
       return {
         ...item,
         files: fileList,
+        tags: tagList,
       }
     })
     const total = await this.prisma.topic.count({ where })
-    return paginateT({ page, data: newData, size: pSize, total })
+    const pagedata = await Promise.all(newData)
+    return paginateT({ page, data: pagedata, size: pSize, total })
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId?: number) {
     const baseData = await this.prisma.topic.findUnique({
       where: { id },
       include: {
         User: { select: { id: true, avatar: true, name: true } },
         comments: true,
+        likes: true,
+        collections: true,
+        TopicTag: true,
       },
     })
+    // 获取tag名称，现在只有tagTd
+    const tags = baseData.TopicTag.map((item) => item.tagId)
+    const tagList = await this.prisma.tag.findMany({ where: { id: { in: tags } } })
+
     // baseData.cover = baseData.cover ? getFileurl(baseData.cover) : ''
     const filesTemp = baseData.files ? baseData.files : []
     const fileList = Array.isArray(filesTemp) ? filesTemp : [filesTemp]
-    // const files = fileList.map((item: any) => {
-    //   const baseData = {
-    //     file: getFileurl(item.filePath),
-    //     filePath: item.filePath,
-    //   }
-    //   if (item.thumbnailPath) {
-    //     baseData['thumbnailUrl'] = getFileurl(item.thumbnailPath)
-    //     baseData['thumbnailPath'] = item.thumbnailPath
-    //   }
-    //   return baseData
-    // })
+    const like =
+      userId &&
+      (await this.prisma.like.findFirst({
+        where: { topicId: id, userId },
+      }))
     const newData = {
       ...baseData,
       files: fileList,
+      like: !!like,
+      tags: tagList,
     }
     return newData
   }

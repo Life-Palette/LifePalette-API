@@ -14,9 +14,13 @@ import { TagModule } from './tag/tag.module'
 import { TopicModule } from './topic/topic.module'
 import { UploadModule } from './upload/upload.module'
 import { VideoModule } from './video/video.module'
-import { UserModule } from './user/user.module';
-import { QrModule } from './qr/qr.module';
-import { AliossModule } from './alioss/alioss.module';
+import { UserModule } from './user/user.module'
+import { QrModule } from './qr/qr.module'
+import { AliossModule } from './alioss/alioss.module'
+import { LikeModule } from './like/like.module'
+import { MessageModule } from './message/message.module'
+import { WsStartGateway } from './websocket/websocket.gateway' //
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -45,8 +49,15 @@ import { AliossModule } from './alioss/alioss.module';
     QrModule,
 
     AliossModule,
+
+    LikeModule,
+
+    MessageModule,
+
+    ChatModule,
+    // WsStartGateway,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [WsStartGateway],
 })
 export class AppModule {}

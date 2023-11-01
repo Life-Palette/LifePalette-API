@@ -11,12 +11,12 @@ export class AliossService {
   private client: any
   public constructor() {
     this.client = new OSS({
-      region: '******',
-      accessKeyId: '******',
-      accessKeySecret: '******',
-      bucket: '******',
+      region: 'oss-cn-chengdu',
+      accessKeyId: 'LTAI5tN5PnDYug4UQLwuuVha',
+      accessKeySecret: 'RhAYCMyDwS8fJb6fjQUhNUslk42hX2',
+      bucket: 'nest-js',
       cname: true,
-      endpoint: '******',
+      endpoint: 'nest-js.oss-accelerate.aliyuncs.com',
     })
   }
 
@@ -253,7 +253,7 @@ export class AliossService {
     const isVideo = name.match(/\.(mp4|avi|rmvb|rm|asf|divx|mpg|mpeg|mpe|wmv|mkv|vob)$/i)
     const extra = {}
     if (isImage) {
-      extra['thumbnail'] = `${returnData}?x-oss-process=image/resize,l_100`
+      extra['thumbnail'] = `${returnData}?x-oss-process=image/resize,l_500`
     } else if (isVideo) {
       extra['cover'] = `${returnData}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
     }
@@ -290,10 +290,10 @@ export class AliossService {
   async getSignature() {
     const config = {
       // 填写你自己的 AccessKey
-      accessKeyId: '******',
-      accessKeySecret: '******',
+      accessKeyId: 'LTAI5tN5PnDYug4UQLwuuVha',
+      accessKeySecret: 'RhAYCMyDwS8fJb6fjQUhNUslk42hX2',
       // 存储桶名字
-      bucket: '******',
+      bucket: 'suqiqi',
       // 文件存储路径
       dir: 'test/',
     }
@@ -332,4 +332,43 @@ export class AliossService {
 
   // aliOssUpload()
   async aliOssUpload(file) {}
+
+  // uniappUpload() 传入file: (binary)
+  async baseUpload(file: Express.Multer.File, bodyDta: any): Promise<any> {
+    // console.log('🦄-----file-----', file)
+    const { originalname } = file
+    const ossPath = `/nestDev/uniapp/${originalname}`
+    const result = await this.client.put(ossPath, file.buffer)
+
+    const {
+      res: { statusCode, requestUrls },
+    } = result || {}
+    if (statusCode === 200) {
+      // 将文件设置为公共可读
+      await this.client.putACL(ossPath, 'public-read')
+    }
+    const returnData = requestUrls[0].split('?')[0] || null
+    const { name } = result
+    // console.log('🌳-----name-----', name)
+    // console.log('🦄-----returnData-----', returnData)
+
+    // 根据name判断文件类型，如果是图片，就返回指定比例的缩略图，如果是视频，就返回视频的第一帧图
+    const isImage = name.match(/\.(jpg|jpeg|png|gif)$/i)
+    const isVideo = name.match(/\.(mp4|avi|rmvb|rm|asf|divx|mpg|mpeg|mpe|wmv|mkv|vob)$/i)
+    const extra = {}
+    if (isImage) {
+      extra['thumbnail'] = `${returnData}?x-oss-process=image/resize,l_500`
+    } else if (isVideo) {
+      extra['cover'] = `${returnData}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
+    }
+    return {
+      code: 200,
+      data: {
+        file: returnData,
+        fileType: isImage ? 'IMAGE' : isVideo ? 'VIDEO' : 'OTHER',
+        ...extra,
+      },
+      message: '上传成功',
+    }
+  }
 }

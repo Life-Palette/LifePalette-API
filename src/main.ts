@@ -6,17 +6,19 @@ import ValidatePipe from './validate/validate.pipe'
 import { SuccessResponseInterceptor } from './success-response.interceptor'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 // import * as fs from 'fs';
+import { WsAdapter } from './websocket/ws.adapter'
 
 async function bootstrap() {
   // 证书
   var fs = require('fs')
-  const httpsOptions = {
-    key: fs.readFileSync('./src/test.wktest.cn.key'),
-    cert: fs.readFileSync('./src/test.wktest.cn.pem'),
-  }
+  // const httpsOptions = {
+  //   key: fs.readFileSync('./src/test.wktest.cn.key'),
+  //   cert: fs.readFileSync('./src/test.wktest.cn.pem'),
+  // }
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    httpsOptions,
+    // httpsOptions,
   })
+
   // 处理跨域
   app.enableCors({
     // origin: origins,
@@ -45,6 +47,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor())
   app.useStaticAssets('uploads', { prefix: '/uploads' })
   app.useStaticAssets('assets', { prefix: '/assets' })
+  app.useWebSocketAdapter(new WsAdapter(app)) // 使用我们的适配器
 
   await app.listen(3001)
 }
